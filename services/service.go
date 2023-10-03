@@ -3,6 +3,8 @@ package services
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xuri/excelize/v2"
@@ -16,10 +18,22 @@ func CreatePivoteTable(filename string, c *gin.Context) {
 
 	// inputWorkbook := os.Args[1]
 
+	// Specify the folder where you want to save the Excel file
+	folderPath := "./output"
+
+	// Create the folder if it doesn't exist
+	if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
+		panic(err)
+	}
+
+	// Specify the full path to the Excel file including the folder
+	filePath := filepath.Join(folderPath, "output.xlsx")
+
 	f := processWorkbook(filename, c)
+
 	if f != nil {
 		// Save the modified workbook to a new file
-		err := f.SaveAs("output.xlsx")
+		err := f.SaveAs(filePath)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "Error saving the output file"})
 			fmt.Println("Error saving the output file:", err)
