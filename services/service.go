@@ -28,6 +28,25 @@ func CreatePivoteTable(filename string, c *gin.Context) {
 
 	// Specify the full path to the Excel file including the folder
 	filePath := filepath.Join(folderPath, "output.xlsx")
+	nf, err := excelize.OpenFile(filename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Define the new column name
+	newColumnName := "Balance Avaiable2"
+
+	// Set the new column name for a specific cell (e.g., cell A1)
+	sheetName := "Summary"
+	cellReference := "M3"
+	nf.SetCellValue(sheetName, cellReference, newColumnName)
+
+	// Save the changes to the Excel file
+	if err := nf.SaveAs(filename); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	f := processWorkbook(filename, c)
 
@@ -60,6 +79,7 @@ func processWorkbook(inputWorkbook string, c *gin.Context) *excelize.File {
 	// Step 1: Copy data from the "Summary" sheet to "Hello" sheet
 	summarySheetName := "Summary"
 	helloSheetName := "Sheet1"
+	// pivotStyle := "Pivot Style5"
 
 	// Define the data range in the "Summary" sheet
 	dataRange := fmt.Sprintf("%s!$A$3:$M$57", summarySheetName)
@@ -68,6 +88,8 @@ func processWorkbook(inputWorkbook string, c *gin.Context) *excelize.File {
 	if err := f.AddPivotTable(&excelize.PivotTableOptions{
 		PivotTableRange: pivotTableRange, // Adjust the range as needed
 		DataRange:       dataRange,
+		// PivotTableStyleName: pivotStyle,
+
 		Rows: []excelize.PivotTableField{
 			{Data: "Region", DefaultSubtotal: true},
 			{Data: "Dist"},
@@ -83,7 +105,7 @@ func processWorkbook(inputWorkbook string, c *gin.Context) *excelize.File {
 			{Data: "Paper Shamrock MTD", Name: "Sum of Paper Shamrock MTD", Subtotal: "Sum"},
 			{Data: "Paper% MTD", Name: "Average of Paper% MTD", Subtotal: "Average"},
 			{Data: "Paper  $ Limit  Full Month 1.9%", Name: "Sum of Paper  $ Limit  Full Month 1.9%", Subtotal: "Sum"},
-			{Data: "Balance Avaiable 2", Name: "Sum of Balance Avaiable 2", Subtotal: "Sum"},
+			{Data: "Balance Avaiable2", Name: "Sum of Balance Avaiable 2", Subtotal: "Sum"},
 		},
 
 		RowGrandTotals: true,
